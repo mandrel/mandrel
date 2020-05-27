@@ -37,7 +37,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.FileTime;
 import java.util.ArrayList;
@@ -72,7 +71,7 @@ public abstract class SourceCache {
      * Create some flavour of source cache.
      */
     protected SourceCache() {
-        basePath = Paths.get(SOURCE_CACHE_ROOT_DIR).resolve(getType().getSubdir());
+        basePath = SOURCE_CACHE_ROOT_DIR.resolve(getType().getSubdir());
         srcRoots = new ArrayList<>();
     }
 
@@ -87,7 +86,7 @@ public abstract class SourceCache {
      * A local directory serving as the root for all source trees maintained by the different
      * available source caches.
      */
-    private static final String SOURCE_CACHE_ROOT_DIR = SubstrateOptions.DebugInfoSourceCacheRoot.getValue();
+    private static final Path SOURCE_CACHE_ROOT_DIR = SubstrateOptions.getDebugInfoSourceCacheRoot();
 
     /**
      * The top level path relative to the root directory under which files belonging to this
