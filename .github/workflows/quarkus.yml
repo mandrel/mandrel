@@ -1,6 +1,6 @@
 name: Quarkus tests
 
-on: [push]
+on: [push, pull_request]
 
 env:
   # Workaround testsuite locale issue
