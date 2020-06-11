@@ -9,16 +9,18 @@ import * as vscode from 'vscode';
 import * as net from 'net';
 import * as path from 'path';
 import { pathToFileURL } from 'url';
-import { LSPORT, connectToLanguageServer, stopLanguageServer, lspArg, hasLSClient, setLSPID } from './graalVMLanguageServer';
+import { LSPORT, connectToLanguageServer, stopLanguageServer, lspArgs, hasLSClient, setLSPID } from './graalVMLanguageServer';
 import { StreamInfo } from 'vscode-languageclient';
+
+const POLYGLOT: string = "polyglot";
 
 export class GraalVMDebugAdapterTracker implements vscode.DebugAdapterTrackerFactory {
 
-	createDebugAdapterTracker(_session: vscode.DebugSession): vscode.ProviderResult<vscode.DebugAdapterTracker> {
+	createDebugAdapterTracker(session: vscode.DebugSession): vscode.ProviderResult<vscode.DebugAdapterTracker> {
 		const inProcessServer = vscode.workspace.getConfiguration('graalvm').get('languageServer.inProcessServer') as boolean;
 		return {
 			onDidSendMessage(message: any) {
-				if (message.type === 'event' && !hasLSClient() && inProcessServer) {
+				if (message.type === 'event' && !hasLSClient() && session.configuration.request === 'launch' && inProcessServer) {
 					if (message.event === 'output' && message.body.category === 'telemetry' && message.body.output === 'childProcessID') {
 						setLSPID(message.body.data.pid);
 					}
@@ -28,7 +30,7 @@ export class GraalVMDebugAdapterTracker implements vscode.DebugAdapterTrackerFac
 							socket.once('error', (e) => {
 								reject(e);
 							});
-							socket.connect(LSPORT, '127.0.0.1', () => {
+							socket.connect(session.configuration._lsPort ? session.configuration._lsPort : LSPORT, '127.0.0.1', () => {
 								resolve({
 									reader: socket,
 									writer: socket
@@ -60,20 +62,32 @@ export class GraalVMConfigurationProvider implements vscode.DebugConfigurationPr
 				} else {
 					config.env = { 'PATH': graalVMBin };
 				}
-				if (inProcessServer) {
+				if (config.request === 'launch' && inProcessServer) {
 					stopLanguageServer().then(() => {
-                        lspArg().then((arg: string) => {
+                        lspArgs().then(args => {
+							const lspArg = args.find(arg => arg.startsWith('--lsp='));
+							if (lspArg) {
+								config._lsPort = parseInt(lspArg.substring(6));
+							}
 							if (config.runtimeArgs) {
-								let idx = config.runtimeArgs.indexOf('--lsp');
+								config.runtimeArgs = config.runtimeArgs.filter((arg: string) => !arg.startsWith('--lsp'));
+								config.runtimeArgs = config.runtimeArgs.concat(args);
+								let idx = config.runtimeArgs.indexOf('--experimental-options');
 								if (idx < 0) {
-									config.runtimeArgs.unshift(arg);
+									config.runtimeArgs = config.runtimeArgs.concat('--experimental-options');
 								}
-								idx = config.runtimeArgs.indexOf('--experimental-options');
-								if (idx < 0) {
-									config.runtimeArgs.unshift('--experimental-options');
+								if (config.runtimeExecutable !== POLYGLOT) {
+									let idx = config.runtimeArgs.indexOf('--polyglot');
+									if (idx < 0) {
+										config.runtimeArgs = config.runtimeArgs.concat('--polyglot');
+									}
 								}
 							} else {
-								config.runtimeArgs = [arg, '--experimental-options'];
+								args = args.concat('--experimental-options');
+								if (config.runtimeExecutable !== POLYGLOT) {
+									args = args.concat('--polyglot');
+								}
+								config.runtimeArgs = args;
 							}
 							resolve(config);
 						});
