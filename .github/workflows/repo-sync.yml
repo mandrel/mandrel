@@ -58,3 +58,27 @@ jobs:
         git remote add upstream https://github.com/oracle/graal
         git pull --quiet upstream release/graal-vm/20.1
         git push --quiet origin oracle-20.1
+
+  mandrel-20-1-bump-JDK:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout 20.1 branch
+      uses: actions/checkout@v2
+      with:
+        ref: 20.1
+        fetch-depth: 0
+    - name: Check and update OpenJDK version
+      run: |
+        git config --local user.email "fzakkak@redhat.com"
+        git config --local user.name "Foivos Zakkak"
+        sed -i -e 's!https.*-jdk_.*.tar.gz !'$(curl -v https://api.adoptopenjdk.net/v3/binary/latest/11/ea/linux/x64/jdk/hotspot/normal/openjdk 2>&1 | awk -F'[ \r]' '/location: /{print $3}')' !' .github/workflows/quarkus.yml
+        sed -i -e 's!https.*-static-libs_.*.tar.gz !'$(curl -v https://api.adoptopenjdk.net/v3/binary/latest/11/ea/linux/x64/staticlibs/hotspot/normal/openjdk 2>&1 | awk -F'[ \r]' '/location: /{print $3}')' !' .github/workflows/quarkus.yml
+    - name: Create Pull Request
+      id: cpr
+      uses: peter-evans/create-pull-request@v2
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        commit-message: Bump CI to latest OpenJDK 11 EA release
+        title: '[CI] Bump OpenJDK version'
+        labels: sync, automated pr
+        branch: jdk-update-20.1
