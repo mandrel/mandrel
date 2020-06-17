@@ -1,3 +1,7 @@
+# Mandrel
+
+## Welcome to the Mandrel project, please see [README-Mandrel.md](README-Mandrel.md) to learn more.
+
 # GraalVM
 
 [![https://graalvm.slack.com](https://img.shields.io/badge/slack-join%20channel-active)](https://www.graalvm.org/slack-invitation/)
