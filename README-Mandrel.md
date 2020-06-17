@@ -1,7 +1,8 @@
 # Mandrel
 
 Mandrel is a downstream distribution of the GraalVM community edition.
-Its main goal is to provide a `native-image` in-place replacement to be used by [Quarkus](https://quarkus.io).
+Mandrel's main goal is to provide a `native-image` release specifically to support [Quarkus](https://quarkus.io).
+The aim is to align the `native-image` capabilities from GraalVM with OpenJDK and Red Hat Enterprise Linux libraries to improve maintainability for native Quarkus applications.
 
 ## How Does Mandrel Differ From Graal
 
