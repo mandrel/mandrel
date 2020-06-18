@@ -37,8 +37,8 @@ jobs:
         fetch-depth: 0
     - name: Sync Master branch
       run: |
-        git config --local user.email "action@github.com"
-        git config --local user.name "GitHub Action"
+        git config --local user.email "fzakkak@redhat.com"
+        git config --local user.name "Foivos Zakkak through GH action"
         git fetch origin oracle-master
         git merge origin/oracle-master
         git push --quiet origin master
