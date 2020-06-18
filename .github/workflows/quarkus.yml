@@ -11,6 +11,8 @@ env:
   NATIVE_TEST_MAVEN_OPTS: "-B -Dtest-postgresql -Dtest-elasticsearch -Dtest-keycloak -Dtest-dynamodb -Dtest-mysql -Dtest-mariadb -Dmariadb.url='jdbc:mariadb://localhost:3308/hibernate_orm_test'  -Dtest-mssql -Dtest-vault -Dtest-neo4j -Dnative-image.xmx=5g -Dnative -Dformat.skip install"
   MX_GIT_CACHE: refcache
   JAVA_HOME: ${{ github.workspace }}/openjdk
+  MANDREL_REPO: ${{ github.workspace }}
+  MX_HOME: ${{ github.workspace }}/../mx
 
 jobs:
   build-mandrel:
@@ -26,6 +28,11 @@ jobs:
         repository: graalvm/mx.git
         ref: master
         path: mx
+    - uses: actions/checkout@v1
+      with:
+        repository: mandrel/mandrel-packaging.git
+        ref: master
+        path: mandrel-packaging
     - uses: actions/cache@v1
       with:
         path: ~/.mx
@@ -41,15 +48,12 @@ jobs:
         tar xf jdk-static-libs.tar.gz -C ${JAVA_HOME} --strip-components=1
         echo ${JAVA_HOME}
         ${JAVA_HOME}/bin/java --version
-    - name: Build mandrel native-image
+    - name: Build Mandrel
       run: |
-        cd substratevm
-        ../../mx/mx --components="Native Image" build
-        mv $(../../mx/mx --components="Native Image" graalvm-home) ~/mandreljdk
-        ~/mandreljdk/bin/native-image --version
-    - name: Tar mandrelJDK
-      shell: bash
-      run: tar -czvf mandreljdk.tgz -C ~ mandreljdk
+        cd ${{ github.workspace }}/../mandrel-packaging
+        ./buildJDK.sh
+        /opt/mandrelJDK/bin/native-image --version
+        mv mandrel-java11-linux-amd64-*.tar.gz ${{ github.workspace }}/mandreljdk.tgz
     - name: Persist Mandrel build
       uses: actions/upload-artifact@v1
       with:
@@ -92,7 +96,7 @@ jobs:
       run: tar -xzvf mandreljdk.tgz -C ~
     - name: Build quarkus
       run: |
-        export JAVA_HOME=~/mandreljdk
+        export JAVA_HOME=~/mandrelJDK
         cd ${GITHUB_WORKSPACE}/quarkus
         eval ./mvnw -e -B -DskipTests -DskipDocs clean install
     - name: Tar Quarkus
@@ -329,8 +333,8 @@ jobs:
           TEST_MODULES: ${{matrix.test-modules}}
         run: |
           cd ~/quarkus
-          export JAVA_HOME=~/mandreljdk
-          export GRAALVM_HOME=~/mandreljdk
+          export JAVA_HOME=~/mandrelJDK
+          export GRAALVM_HOME=~/mandrelJDK
           ${GRAALVM_HOME}/bin/native-image --version
           for i in $TEST_MODULES
           do modules+=("integration-tests/$i"); done
