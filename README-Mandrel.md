@@ -20,7 +20,7 @@ They should not cause the resulting images themselves to execute in a noticeably
 
 ## Communication Channels
 
-* [Slack](https://graalvm.slack.com) - Join #mandrel channel
+* [Slack](https://www.graalvm.org/slack-invitation) - Join #mandrel channel at graalvm's slack workspace
 * [graalvm-dev@oss.oracle.com](mailto:graalvm-dev@oss.oracle.com?subject=[MANDREL]) mailing list - Subscribe [here](https://oss.oracle.com/mailman/listinfo/graalvm-dev)
 * [GitHub issues](https://github.com/graalvm/mandrel/issues) for bug reports, questions, or requests for enhancements.
 
