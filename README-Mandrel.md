@@ -43,6 +43,11 @@ On Fedora/CentOS/RHEL they can be installed with:
 dnf install glibc-devel zlib-devel gcc libffi-devel
 ```
 
+On Ubuntu-like systems with:
+```bash
+apt install gcc zlib1g-dev libffi-dev
+```
+
 ### Building Mandrel From Source
 
 For building Mandrel from source please see [mandrel-packaging](https://github.com/graalvm/mandrel-packaging)
