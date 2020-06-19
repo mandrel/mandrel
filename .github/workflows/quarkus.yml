@@ -1,6 +1,26 @@
 name: Quarkus tests
 
-on: [push, pull_request]
+on:
+  push:
+    paths-ignore:
+      - 'README.md'
+      - 'README-Mandrel.md'
+      - 'CONTRIBUTING.md'
+      - 'SECURITY.md'
+      - 'LICENSE'
+      - '.github/ISSUE_TEMPLATE/**'
+      - '.travis.yml'
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths-ignore:
+      - 'docs/src/main/asciidoc/**'
+      - 'README.md'
+      - 'README-Mandrel.md'
+      - 'CONTRIBUTING.md'
+      - 'SECURITY.md'
+      - 'LICENSE'
+      - '.github/ISSUE_TEMPLATE/**'
+      - '.travis.yml'
 
 env:
   # Workaround testsuite locale issue
@@ -8,7 +28,7 @@ env:
   DB_USER: hibernate_orm_test
   DB_PASSWORD: hibernate_orm_test
   DB_NAME: hibernate_orm_test
-  NATIVE_TEST_MAVEN_OPTS: "-B -Dtest-postgresql -Dtest-elasticsearch -Dtest-keycloak -Dtest-dynamodb -Dtest-mysql -Dtest-mariadb -Dmariadb.url='jdbc:mariadb://localhost:3308/hibernate_orm_test'  -Dtest-mssql -Dtest-vault -Dtest-neo4j -Dnative-image.xmx=5g -Dnative -Dformat.skip install"
+  NATIVE_TEST_MAVEN_OPTS: "-B --settings .github/mvn-settings.xml --fail-at-end -Dtest-postgresql -Dtest-elasticsearch -Dtest-keycloak -Dtest-amazon-services -Dtest-db2 -Dtest-mysql -Dtest-mariadb -Dmariadb.base_url='jdbc:mariadb://localhost:3308' -Dmariadb.url='jdbc:mariadb://localhost:3308/hibernate_orm_test'  -Dtest-mssql -Dtest-vault -Dtest-neo4j -Dtest-kafka -Dnative-image.xmx=5g -Dnative -Dformat.skip install"
   MX_GIT_CACHE: refcache
   JAVA_HOME: ${{ github.workspace }}/openjdk
   MANDREL_REPO: ${{ github.workspace }}
@@ -34,6 +54,9 @@ jobs:
         repository: graalvm/mandrel-packaging.git
         ref: master
         path: mandrel-packaging
+    - uses: n1hility/cancel-previous-runs@v2
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
     - uses: actions/cache@v1
       with:
         path: ~/.mx
@@ -56,13 +79,13 @@ jobs:
         ${MANDREL_HOME}/bin/native-image --version
         mv mandrel-java11-linux-amd64-*.tar.gz ${{ github.workspace }}/mandreljdk.tgz
     - name: Persist Mandrel build
-      uses: actions/upload-artifact@v1
+      uses: actions/upload-artifact@v2
       with:
         name: mandreljdk
         path: mandreljdk.tgz
 
   build-quarkus:
-    name: Quarkus build
+    name: ${{ matrix.category }} build
     runs-on: ubuntu-18.04
     needs: build-mandrel
     strategy:
@@ -97,28 +120,20 @@ jobs:
       run: tar -xzvf mandreljdk.tgz -C ~
     - name: Build quarkus
       run: |
-        export JAVA_HOME=~/mandrelvm
+        export JAVA_HOME="${HOME}/mandrelvm"
         cd ${GITHUB_WORKSPACE}/quarkus
-        eval ./mvnw -e -B -DskipTests -DskipDocs clean install
-    - name: Tar Quarkus
-      shell: bash
-      run: tar -czvf quarkus-${{ matrix.quarkus-name }}.tgz -C ${GITHUB_WORKSPACE}/ quarkus
-    - name: Persist Quarkus
-      uses: actions/upload-artifact@v1
-      with:
-        name: quarkus-${{ matrix.quarkus-name }}
-        path: quarkus-${{ matrix.quarkus-name }}.tgz
+        mvn -e -B -DskipTests -DskipITs -Dno-format -Ddocumentation-pdf clean install
     - name: Tar Maven Repo
       shell: bash
       run: tar -czvf maven-repo-${{ matrix.quarkus-name }}.tgz -C ~ .m2/repository
     - name: Persist Maven Repo
-      uses: actions/upload-artifact@v1
+      uses: actions/upload-artifact@v2
       with:
         name: maven-repo-${{ matrix.quarkus-name }}
         path: maven-repo-${{ matrix.quarkus-name }}.tgz
 
   native-tests:
-    name: Native Tests - ${{matrix.category}}
+    name: ${{matrix.quarkus-name}} - ${{matrix.category}}
     needs:
       - build-mandrel
       - build-quarkus
@@ -129,61 +144,75 @@ jobs:
       fail-fast: false
       matrix:
         quarkus-name: [release, master]
-        category: [Main, Data1, Data2, Data3, Data4, Data5, Security1, Security2, Amazon, Messaging, Cache, HTTP, Misc1, Misc2, Misc3, Spring]
+        category: [Main, Data1, Data2, Data3, Data4, Data5, Security1, Security2, Security3, Amazon, Messaging, Cache, HTTP, Misc1, Misc2, Misc3, Misc4, Spring, gRPC]
         include:
+          - quarkus-name: release
+            quarkus-url: $(curl -sL https://api.github.com/repos/quarkusio/quarkus/releases/latest | jq -r .tarball_url)
+          - quarkus-name: master
+            quarkus-url: https://api.github.com/repos/quarkusio/quarkus/tarball/master
           - category: Main
             postgres: "true"
-            timeout: 30
+            timeout: 40
             test-modules: main
           - category: Data1
             mariadb: "true"
             mssql: "true"
-            timeout: 50
+            timeout: 65
             test-modules: >
               jpa-h2
               jpa-mariadb
               jpa-mssql
               jpa-derby
               jpa-without-entity
+              hibernate-tenancy
           - category: Data2
+            db2: "true"
             mysql: "true"
             postgres: "true"
-            timeout: 30
+            mariadb: "true"
+            timeout: 65
             test-modules: >
               jpa
               jpa-postgresql
               jpa-mysql
               reactive-mysql-client
+              reactive-db2-client
+              hibernate-reactive-db2
+              hibernate-reactive-mysql
           - category: Data3
             postgres: "true"
-            timeout: 40
+            timeout: 70
             test-modules: >
               flyway
               hibernate-orm-panache
-              reactive-pg-client
+              hibernate-orm-panache-kotlin
               liquibase
           - category: Data4
             neo4j: "true"
-            timeout: 30
+            timeout: 50
             test-modules: >
               mongodb-client
               mongodb-panache
               neo4j
+              hibernate-orm-rest-data-panache
           - category: Data5
-            timeout: 30
+            postgres: "true"
+            timeout: 55
             test-modules: >
               hibernate-search-elasticsearch
               narayana-stm
               narayana-jta
+              reactive-pg-client
+              hibernate-reactive-postgresql
           - category: Amazon
-            dynamodb: "true"
-            timeout: 20
+            amazonServices: "true"
+            timeout: 45
             test-modules: >
-              amazon-dynamodb
+              amazon-services
               amazon-lambda
               amazon-lambda-http
           - category: Messaging
-            timeout: 65
+            timeout: 75
             test-modules: >
               artemis-core
               artemis-jms
@@ -191,7 +220,7 @@ jobs:
               kafka-streams
               reactive-messaging-amqp
           - category: Security1
-            timeout: 40
+            timeout: 50
             keycloak: "true"
             test-modules: >
               elytron-security-oauth2
@@ -200,24 +229,29 @@ jobs:
               elytron-undertow
               elytron-security-ldap
           - category: Security2
-            timeout: 60
+            timeout: 70
             keycloak: "true"
             test-modules: >
               elytron-resteasy
               oidc
               oidc-code-flow
               oidc-tenancy
-              vault-app
               keycloak-authorization
+          - category: Security3
+            timeout: 50
+            test-modules: >
+              vault
+              vault-app
+              vault-agroal
           - category: Cache
-            timeout: 30
+            timeout: 55
             test-modules: >
               infinispan-cache-jpa
               infinispan-client
               infinispan-embedded
               cache
           - category: HTTP
-            timeout: 35
+            timeout: 55
             test-modules: >
               resteasy-jackson
               resteasy-mutiny
@@ -225,8 +259,9 @@ jobs:
               vertx-http
               vertx-graphql
               virtual-http
+              rest-client
           - category: Misc1
-            timeout: 40
+            timeout: 60
             test-modules: >
               maven
               jackson
@@ -235,36 +270,51 @@ jobs:
               jgit
               quartz
               qute
+              consul-config
           - category: Misc2
-            timeout: 40
+            timeout: 55
             test-modules: >
               tika
               hibernate-validator
               test-extension
               logging-gelf
               bootstrap-config
-              optaplanner-jackson
-              optaplanner-jsonb
           # kubernetes-client alone takes 30mn+
           - category: Misc3
-            timeout: 50
+            timeout: 60
             test-modules: >
               kubernetes-client
-          - category: Spring
+          - category: Misc4
             timeout: 30
+            test-modules: >
+              smallrye-graphql
+              picocli-native
+              gradle
+          - category: Spring
+            timeout: 50
             test-modules: >
               spring-di
               spring-web
               spring-data-jpa
               spring-boot-properties
               spring-cloud-config-client
+          - category: gRPC
+            timeout: 65
+            test-modules: >
+              grpc-health
+              grpc-interceptors
+              grpc-mutual-auth
+              grpc-plain-text
+              grpc-proto-v2
+              grpc-streaming
+              grpc-tls
     steps:
       # These should be services, but services do not (yet) allow conditional execution
       - name: Postgres Service
         run: |
-          docker run --rm --publish 5432:5432 --name build-postgres \
-          -e POSTGRES_USER=$DB_USER -e POSTGRES_PASSWORD=$DB_PASSWORD -e POSTGRES_DB=$DB_NAME \
-          -d postgres:10.5
+              docker run --rm --publish 5432:5432 --name build-postgres \
+              -e POSTGRES_USER=$DB_USER -e POSTGRES_PASSWORD=$DB_PASSWORD -e POSTGRES_DB=$DB_NAME \
+              -d postgres:10.5
         if: matrix.postgres
       - name: MySQL Service
         run: |
@@ -273,23 +323,29 @@ jobs:
             -e MYSQL_USER=$DB_USER -e MYSQL_PASSWORD=$DB_PASSWORD -e MYSQL_DATABASE=$DB_NAME -e MYSQL_RANDOM_ROOT_PASSWORD=true \
             -d mysql:5 --skip-ssl
         if: matrix.mysql
+      - name: DB2 Service
+        run: |
+          docker run --rm --publish 50000:50000 --name build-db2 --privileged=true \
+            -e DB2INSTANCE=hreact -e DB2INST1_PASSWORD=hreact -e DBNAME=hreact -e LICENSE=accept -e AUTOCONFIG=false -e ARCHIVE_LOGS=false \
+            -d ibmcom/db2:11.5.0.0a
+        if: matrix.db2
       - name: Maria DB Service
         run: |
           docker run --rm --publish 3308:3306 --name build-mariadb \
-            -e MYSQL_USER=$DB_USER -e MYSQL_PASSWORD=$DB_PASSWORD -e MYSQL_DATABASE=$DB_NAME -e MYSQL_RANDOM_ROOT_PASSWORD=true \
+            -e MYSQL_USER=$DB_USER -e MYSQL_PASSWORD=$DB_PASSWORD -e MYSQL_DATABASE=$DB_NAME -e MYSQL_ROOT_PASSWORD=secret \
             -d mariadb:10.4
         if: matrix.mariadb
       - name: MS-SQL Service
         run: |
           docker run --rm --publish 1433:1433 --name build-mssql \
             -e ACCEPT_EULA=Y -e SA_PASSWORD=ActuallyRequired11Complexity \
-            -d microsoft/mssql-server-linux:2017-CU12
+            -d microsoft/mssql-server-linux:2017-CU13
         if: matrix.mssql
-      - name: Dynamo DB Service
+      - name: Amazon Services
         run: |
-          docker run --rm --publish 8000:8000 --name build-dynamodb \
-            -d amazon/dynamodb-local:1.11.477
-        if: matrix.dynamodb
+          docker run --rm --publish 8000:4569 --publish 8008:4572 --publish 8009:4575 --publish 8010:4576 --publish 8011:4599 --publish 8012:4566 --name build-amazon-service-clients -e SERVICES=s3,dynamodb,sns,sqs,kms,ses -e START_WEB=0 \
+            -d localstack/localstack:0.11.1
+        if: matrix.amazonServices
       - name: Neo4j Service
         run: |
           docker run --rm --publish 7687:7687 --name build-neo4j \
@@ -303,7 +359,7 @@ jobs:
               -server -Xms64m -Xmx512m -XX:MetaspaceSize=96M \
               -XX:MaxMetaspaceSize=256m -Djava.net.preferIPv4Stack=true -Djava.awt.headless=true \
               -Dkeycloak.profile.feature.upload_scripts=enabled" \
-            -d quay.io/keycloak/keycloak:10.0.0
+            -d quay.io/keycloak/keycloak:10.0.2
         if: matrix.keycloak
       - name: Download Maven Repo
         uses: actions/download-artifact@v1
@@ -321,32 +377,44 @@ jobs:
       - name: Extract Mandrel build
         shell: bash
         run: tar -xzvf mandreljdk.tgz -C ~
-      - name: Download Quarkus
-        uses: actions/download-artifact@v1
-        with:
-          name: quarkus-${{ matrix.quarkus-name }}
-          path: .
-      - name: Extract Quarkus
-        shell: bash
-        run: tar -xzvf quarkus-${{ matrix.quarkus-name }}.tgz -C ~
+      - name: Get quarkus
+        run: |
+          curl --output quarkus.tgz -sL ${{ matrix.quarkus-url }}
+          mkdir ${GITHUB_WORKSPACE}/quarkus
+          tar xf quarkus.tgz -C ${GITHUB_WORKSPACE}/quarkus --strip-components=1
+      - name: Reclaim disk space
+        run: |
+          # Reclaim disk space, otherwise we only have 13 GB free at the start of a job
+          docker rmi node:10 node:12 mcr.microsoft.com/azure-pipelines/node8-typescript:latest
+          # That is 18 GB
+          sudo rm -rf /usr/share/dotnet
+          # That is 1.2 GB
+          sudo rm -rf /usr/share/swift
       - name: Build with Maven
         env:
           TEST_MODULES: ${{matrix.test-modules}}
+          CATEGORY: ${{matrix.category}}
         run: |
-          cd ~/quarkus
-          export JAVA_HOME=~/mandrelvm
-          export GRAALVM_HOME=~/mandrelvm
+          cd ${GITHUB_WORKSPACE}/quarkus
+          export JAVA_HOME="${HOME}/mandrelvm"
+          export GRAALVM_HOME="${HOME}/mandrelvm"
           ${GRAALVM_HOME}/bin/native-image --version
           for i in $TEST_MODULES
           do modules+=("integration-tests/$i"); done
           IFS=,
-          eval ./mvnw -pl "${modules[*]}" $NATIVE_TEST_MAVEN_OPTS
+          eval mvn -pl "${modules[*]}" $NATIVE_TEST_MAVEN_OPTS
+          # add the 'simple with spaces' project to the run of 'Misc1' by executing it explicitly
+          # done because there is no good way to pass strings with empty values to the previous command
+          # so this hack is as good as any
+          if [ "$CATEGORY" == "Misc1" ]; then
+            mvn -Dnative -B --settings .github/mvn-settings.xml -f 'integration-tests/simple with space/' verify
+          fi
       - name: Prepare failure archive (if maven failed)
         if: failure()
         shell: bash
-        run: find . -name '*-reports' -type d | tar -czvf test-reports.tgz -T -
+        run: find . -type d -name '*-reports' -o -wholename '*/build/reports/tests/functionalTest' | tar -czf test-reports.tgz -T -
       - name: Upload failure Archive (if maven failed)
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v2
         if: failure()
         with:
           name: test-reports-native-${{matrix.category}}
