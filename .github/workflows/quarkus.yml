@@ -12,6 +12,7 @@ env:
   MX_GIT_CACHE: refcache
   JAVA_HOME: ${{ github.workspace }}/openjdk
   MANDREL_REPO: ${{ github.workspace }}
+  MANDREL_HOME: ${{ github.workspace }}/../mandrelvm
   MX_HOME: ${{ github.workspace }}/../mx
 
 jobs:
@@ -52,7 +53,7 @@ jobs:
       run: |
         cd ${{ github.workspace }}/../mandrel-packaging
         ./buildJDK.sh
-        /opt/mandrelJDK/bin/native-image --version
+        ${MANDREL_HOME}/bin/native-image --version
         mv mandrel-java11-linux-amd64-*.tar.gz ${{ github.workspace }}/mandreljdk.tgz
     - name: Persist Mandrel build
       uses: actions/upload-artifact@v1
@@ -96,7 +97,7 @@ jobs:
       run: tar -xzvf mandreljdk.tgz -C ~
     - name: Build quarkus
       run: |
-        export JAVA_HOME=~/mandrelJDK
+        export JAVA_HOME=~/mandrelvm
         cd ${GITHUB_WORKSPACE}/quarkus
         eval ./mvnw -e -B -DskipTests -DskipDocs clean install
     - name: Tar Quarkus
@@ -333,8 +334,8 @@ jobs:
           TEST_MODULES: ${{matrix.test-modules}}
         run: |
           cd ~/quarkus
-          export JAVA_HOME=~/mandrelJDK
-          export GRAALVM_HOME=~/mandrelJDK
+          export JAVA_HOME=~/mandrelvm
+          export GRAALVM_HOME=~/mandrelvm
           ${GRAALVM_HOME}/bin/native-image --version
           for i in $TEST_MODULES
           do modules+=("integration-tests/$i"); done
