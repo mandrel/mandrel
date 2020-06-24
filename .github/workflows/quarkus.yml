@@ -1,6 +1,6 @@
 name: Quarkus tests
 
-on: [push]
+on: [push, pull_request]
 
 env:
   # Workaround testsuite locale issue
@@ -11,6 +11,9 @@ env:
   NATIVE_TEST_MAVEN_OPTS: "-B -Dtest-postgresql -Dtest-elasticsearch -Dtest-keycloak -Dtest-dynamodb -Dtest-mysql -Dtest-mariadb -Dmariadb.url='jdbc:mariadb://localhost:3308/hibernate_orm_test'  -Dtest-mssql -Dtest-vault -Dtest-neo4j -Dnative-image.xmx=5g -Dnative -Dformat.skip install"
   MX_GIT_CACHE: refcache
   JAVA_HOME: ${{ github.workspace }}/openjdk
+  MANDREL_REPO: ${{ github.workspace }}
+  MANDREL_HOME: ${{ github.workspace }}/../mandrelvm
+  MX_HOME: ${{ github.workspace }}/../mx
 
 jobs:
   build-mandrel:
@@ -26,6 +29,11 @@ jobs:
         repository: graalvm/mx.git
         ref: master
         path: mx
+    - uses: actions/checkout@v1
+      with:
+        repository: graalvm/mandrel-packaging.git
+        ref: master
+        path: mandrel-packaging
     - uses: actions/cache@v1
       with:
         path: ~/.mx
@@ -34,22 +42,19 @@ jobs:
           ${{ runner.os }}-mx-
     - name: Get openJDK11 with static libs
       run: |
-        curl -sL https://github.com/AdoptOpenJDK/openjdk11-upstream-binaries/releases/download/jdk-11.0.8%2B4/OpenJDK11U-jdk_x64_linux_11.0.8_4_ea.tar.gz -o jdk.tar.gz
-        curl -sL https://github.com/AdoptOpenJDK/openjdk11-upstream-binaries/releases/download/jdk-11.0.8%2B4/OpenJDK11U-static-libs_x64_linux_11.0.8_4_ea.tar.gz -o jdk-static-libs.tar.gz
+        curl -sL https://github.com/AdoptOpenJDK/openjdk11-upstream-binaries/releases/download/jdk-11.0.8%2B7/OpenJDK11U-jdk_x64_linux_11.0.8_7_ea.tar.gz -o jdk.tar.gz
+        curl -sL https://github.com/AdoptOpenJDK/openjdk11-upstream-binaries/releases/download/jdk-11.0.8%2B7/OpenJDK11U-static-libs_x64_linux_11.0.8_7_ea.tar.gz -o jdk-static-libs.tar.gz
         mkdir -p ${JAVA_HOME}
         tar xf jdk.tar.gz -C ${JAVA_HOME} --strip-components=1
         tar xf jdk-static-libs.tar.gz -C ${JAVA_HOME} --strip-components=1
         echo ${JAVA_HOME}
         ${JAVA_HOME}/bin/java --version
-    - name: Build mandrel native-image
+    - name: Build Mandrel
       run: |
-        cd substratevm
-        ../../mx/mx --components="Native Image" build
-        mv $(../../mx/mx --components="Native Image" graalvm-home) ~/mandreljdk
-        ~/mandreljdk/bin/native-image --version
-    - name: Tar mandrelJDK
-      shell: bash
-      run: tar -czvf mandreljdk.tgz -C ~ mandreljdk
+        cd ${{ github.workspace }}/../mandrel-packaging
+        ./buildJDK.sh
+        ${MANDREL_HOME}/bin/native-image --version
+        mv mandrel-java11-linux-amd64-*.tar.gz ${{ github.workspace }}/mandreljdk.tgz
     - name: Persist Mandrel build
       uses: actions/upload-artifact@v1
       with:
@@ -92,7 +97,7 @@ jobs:
       run: tar -xzvf mandreljdk.tgz -C ~
     - name: Build quarkus
       run: |
-        export JAVA_HOME=~/mandreljdk
+        export JAVA_HOME=~/mandrelvm
         cd ${GITHUB_WORKSPACE}/quarkus
         eval ./mvnw -e -B -DskipTests -DskipDocs clean install
     - name: Tar Quarkus
@@ -329,8 +334,8 @@ jobs:
           TEST_MODULES: ${{matrix.test-modules}}
         run: |
           cd ~/quarkus
-          export JAVA_HOME=~/mandreljdk
-          export GRAALVM_HOME=~/mandreljdk
+          export JAVA_HOME=~/mandrelvm
+          export GRAALVM_HOME=~/mandrelvm
           ${GRAALVM_HOME}/bin/native-image --version
           for i in $TEST_MODULES
           do modules+=("integration-tests/$i"); done
