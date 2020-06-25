@@ -31,7 +31,7 @@ jobs:
         path: mx
     - uses: actions/checkout@v1
       with:
-        repository: mandrel/mandrel-packaging.git
+        repository: graalvm/mandrel-packaging.git
         ref: master
         path: mandrel-packaging
     - uses: actions/cache@v1
