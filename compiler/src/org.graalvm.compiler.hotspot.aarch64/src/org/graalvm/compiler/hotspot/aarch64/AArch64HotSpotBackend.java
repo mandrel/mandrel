@@ -254,6 +254,11 @@ public class AArch64HotSpotBackend extends HotSpotHostBackend implements LIRGene
         }
 
         @Override
+        public void returned(CompilationResultBuilder crb) {
+            // nothing to do
+        }
+
+        @Override
         public boolean hasFrame() {
             return true;
         }

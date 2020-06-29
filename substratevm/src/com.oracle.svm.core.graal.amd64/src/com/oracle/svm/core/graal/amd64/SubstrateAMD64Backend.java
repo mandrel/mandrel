@@ -741,7 +741,11 @@ public class SubstrateAMD64Backend extends SubstrateBackend implements LIRGenera
             }
 
             tasm.recordMark(MARK_EPILOGUE_INCD_RSP);
-            tasm.recordMark(MARK_EPILOGUE_END);
+        }
+
+        @Override
+        public void returned(CompilationResultBuilder crb) {
+            crb.recordMark(MARK_EPILOGUE_END);
         }
 
         @Override

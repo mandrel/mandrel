@@ -576,6 +576,11 @@ public class SubstrateAArch64Backend extends SubstrateBackend implements LIRGene
         }
 
         @Override
+        public void returned(CompilationResultBuilder crb) {
+            crb.recordMark(MARK_EPILOGUE_END);
+        }
+
+        @Override
         public boolean hasFrame() {
             return true;
         }
