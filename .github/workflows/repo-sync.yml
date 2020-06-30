@@ -10,24 +10,7 @@ on:
   - cron: '0 4 * * *'
 
 jobs:
-  oracle-master:
-    runs-on: ubuntu-latest
-    steps:
-    - name: Checkout Oracle Master branch
-      uses: actions/checkout@v2
-      with:
-        ref: oracle-master
-        fetch-depth: 0
-    - name: Sync Oracle Master branch
-      run: |
-        git config --local user.email "action@github.com"
-        git config --local user.name "GitHub Action"
-        git remote add upstream https://github.com/oracle/graal
-        git pull --quiet upstream master
-        git push --quiet origin oracle-master
-
   mandrel-master:
-    needs: oracle-master
     runs-on: ubuntu-latest
     steps:
     - name: Checkout Master branch
@@ -39,22 +22,7 @@ jobs:
       run: |
         git config --local user.email "fzakkak@redhat.com"
         git config --local user.name "Foivos Zakkak through GH action"
-        git fetch origin oracle-master
-        git merge origin/oracle-master
-        git push --quiet origin master
-
-  oracle-20-1:
-    runs-on: ubuntu-latest
-    steps:
-    - name: Checkout Oracle 20.1 branch
-      uses: actions/checkout@v2
-      with:
-        ref: oracle-20.1
-        fetch-depth: 0
-    - name: Sync Oracle 20.1 branch
-      run: |
-        git config --local user.email "action@github.com"
-        git config --local user.name "GitHub Action"
         git remote add upstream https://github.com/oracle/graal
-        git pull --quiet upstream release/graal-vm/20.1
-        git push --quiet origin oracle-20.1
+        git fetch upstream master
+        git merge upstream/master
+        git push --quiet origin master
