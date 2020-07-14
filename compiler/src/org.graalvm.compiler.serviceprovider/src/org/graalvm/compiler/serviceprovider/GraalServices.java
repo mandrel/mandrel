@@ -29,6 +29,8 @@ import java.io.InputStream;
 import java.util.List;
 
 import jdk.vm.ci.code.VirtualObject;
+import jdk.vm.ci.meta.ConstantPool;
+import jdk.vm.ci.meta.JavaType;
 import jdk.vm.ci.meta.ResolvedJavaType;
 import jdk.vm.ci.meta.SpeculationLog.SpeculationReason;
 import jdk.vm.ci.services.JVMCIPermission;
@@ -253,4 +255,14 @@ public final class GraalServices {
     public static int getJavaUpdateVersion() {
         throw shouldNotReachHere();
     }
+
+    @SuppressWarnings("unused")
+    public static JavaType lookupReferencedType(ConstantPool constantPool, int cpi, int opcode) {
+        throw shouldNotReachHere();
+    }
+
+    public static boolean hasLookupReferencedType() {
+        throw shouldNotReachHere();
+    }
+
 }

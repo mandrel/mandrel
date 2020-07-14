@@ -160,6 +160,15 @@ public class WrappedConstantPool implements ConstantPool {
     }
 
     @Override
+    public JavaType lookupReferencedType(int cpi, int opcode) {
+        if (wrapped instanceof WrappedConstantPool) {
+            return ((WrappedConstantPool) wrapped).lookupReferencedType(cpi, opcode);
+        } else {
+            return wrapped.lookupReferencedType(cpi, opcode);
+        }
+    }
+
+    @Override
     public WrappedSignature lookupSignature(int cpi) {
         return universe.lookup(wrapped.lookupSignature(cpi), defaultAccessingClass);
     }

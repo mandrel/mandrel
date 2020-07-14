@@ -40,6 +40,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import jdk.vm.ci.code.VirtualObject;
+import jdk.vm.ci.meta.ConstantPool;
+import jdk.vm.ci.meta.JavaType;
 import jdk.vm.ci.meta.ResolvedJavaField;
 import jdk.vm.ci.meta.ResolvedJavaMethod;
 import jdk.vm.ci.meta.ResolvedJavaType;
@@ -448,5 +450,14 @@ public final class GraalServices {
             throw new InternalError("Unexpected java.vm.version value: " + vmVersion);
         }
         return Integer.parseInt(matcher.group(1));
+    }
+
+    @SuppressWarnings("unused")
+    public static JavaType lookupReferencedType(ConstantPool constantPool, int cpi, int opcode) {
+        throw new InternalError("This JVMCI version doesn't support ConstantPool.lookupReferencedType()");
+    }
+
+    public static boolean hasLookupReferencedType() {
+        return false;
     }
 }
