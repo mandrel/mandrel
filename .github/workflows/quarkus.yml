@@ -122,7 +122,7 @@ jobs:
       run: |
         export JAVA_HOME="${HOME}/mandrelvm"
         cd ${GITHUB_WORKSPACE}/quarkus
-        mvn -e -B -DskipTests -DskipITs -Dno-format -Ddocumentation-pdf clean install
+        mvn -e -B --settings .github/mvn-settings.xml -DskipTests -DskipITs -Dno-format -Ddocumentation-pdf clean install
     - name: Tar Maven Repo
       shell: bash
       run: tar -czvf maven-repo-${{ matrix.quarkus-name }}.tgz -C ~ .m2/repository
