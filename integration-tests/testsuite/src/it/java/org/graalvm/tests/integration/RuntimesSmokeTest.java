@@ -152,4 +152,10 @@ public class RuntimesSmokeTest {
     public void micronautHelloWorld(TestInfo testInfo) throws IOException, InterruptedException {
         testRuntime(testInfo, Apps.MICRONAUT_HELLOWORLD);
     }
+
+    @Test
+    @Tag("helidon")
+    public void helidonQuickStart(TestInfo testInfo) throws IOException, InterruptedException {
+        testRuntime(testInfo, Apps.HELIDON_QUICKSTART_SE);
+    }
 }

@@ -42,6 +42,13 @@ public enum URLContent {
             new String[]{"http://localhost:8080/data/secured/test", "Jessie specific value"},
             new String[]{"http://localhost:8080/openapi", "/resilience"},
             new String[]{"http://localhost:8080/data/client/test/parameterValue=xxx", "Processed parameter value 'parameterValue=xxx'"}
+    }),
+
+    HELIDON_QUICKSTART_SE(new String[][]{
+            new String[]{"http://localhost:8080/greet", "Hello World!"},
+            new String[]{"http://localhost:8080/greet/Karm", "Hello Karm!"},
+            new String[]{"http://localhost:8080/health", "\"UP\""},
+            new String[]{"http://localhost:8080/metrics", "availableProcessors"}
     });
 
     public final String[][] urlContent;

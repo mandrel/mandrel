@@ -49,7 +49,11 @@ public enum Apps {
     QUARKUS_FULL_MICROPROFILE("apps" + File.separator + "quarkus-full-microprofile",
             URLContent.QUARKUS_FULL_MICROPROFILE,
             WhitelistLogLines.QUARKUS_FULL_MICROPROFILE,
-            BuildAndRunCmds.QUARKUS_FULL_MICROPROFILE);
+            BuildAndRunCmds.QUARKUS_FULL_MICROPROFILE),
+    HELIDON_QUICKSTART_SE("apps" + File.separator + "helidon-quickstart-se",
+            URLContent.HELIDON_QUICKSTART_SE,
+            WhitelistLogLines.HELIDON_QUICKSTART_SE,
+            BuildAndRunCmds.HELIDON_QUICKSTART_SE);
 
     public final String dir;
     public final URLContent urlContent;

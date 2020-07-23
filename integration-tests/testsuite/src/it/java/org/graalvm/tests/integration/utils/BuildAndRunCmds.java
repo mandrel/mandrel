@@ -42,6 +42,10 @@ public enum BuildAndRunCmds {
             new String[]{"mvn", "package"},
             new String[]{"native-image", "-jar", "target/random-numbers.jar", "target/random-numbers"},
             new String[]{Commands.isThisWindows ? "target\\random-numbers" : "./target/random-numbers"}
+    }),
+    HELIDON_QUICKSTART_SE(new String[][]{
+            new String[]{"mvn", "package"},
+            new String[]{Commands.isThisWindows ? "target\\helidon-quickstart-se" : "./target/helidon-quickstart-se"}
     });
 
     public final String[][] cmds;

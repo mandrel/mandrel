@@ -33,6 +33,9 @@
         <!-- Micronaut minimal app -->
         <micronaut.version>2.0.0</micronaut.version>
 
+        <!-- Helidon quickstart -->
+        <version.helidon>2.0.1</version.helidon>
+
         <!-- General TS deps -->
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
@@ -51,24 +54,6 @@
         <!-- Test to be executed by default (should be all of them) -->
         <includeTags>runtimes,reproducers</includeTags>
     </properties>
-
-    <dependencies>
-        <dependency>
-            <groupId>org.jboss.logging</groupId>
-            <artifactId>jboss-logging</artifactId>
-            <version>${jboss-logging.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-api</artifactId>
-            <version>${log4j.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-core</artifactId>
-            <version>${log4j.version}</version>
-        </dependency>
-    </dependencies>
 
     <profiles>
         <profile>
@@ -92,6 +77,7 @@
                 <module>testsuite</module>
                 <module>apps/quarkus-full-microprofile</module>
                 <module>apps/micronaut-helloworld</module>
+                <module>apps/helidon-quickstart-se</module>
                 <module>apps/random-numbers</module>
             </modules>
         </profile>

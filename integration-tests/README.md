@@ -33,6 +33,11 @@ One can fine-tune excluded test cases or tests with `excludeTags`, e.g. `-Dexclu
 to exclude all `runtimes` tests or `-DexcludeTags=micronaut` to exclude just one of them. 
 You can also exclude everything and include just `reproducers` suite: `-DexcludeTags=all -DincludeTags=reproducers`
 
+## Downloading a lot of data
+
+While the testsuite itself doesn't have many dependencies, it downloads all that is needed
+to build enclosed Quarkus, Micronaut and Helidon projects.
+
 ## RuntimesSmokeTest
 
 The goal is to build and start applications with some real source code that actually

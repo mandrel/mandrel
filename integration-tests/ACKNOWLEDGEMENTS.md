@@ -14,5 +14,8 @@ The original work was authored by Michal Karm Babacek <karm@redhat.com> and lice
 Micronaut Hello World application was adapted from a generated quickstart project on [https://micronaut.io/launch/](https://micronaut.io/launch/) 
 and from the Micronaut's cli tool generated `mn create-app hello-world --build maven` project.
 
+## Helidon
+Helidon example app was adapted from a Helidon SE QuickStart archetype. See [QuickStart](https://helidon.io/docs/latest/#/se/guides/02_quickstart).
+
 ## Windows console and CTRL+C
 The method of handling the CTRL+C was adopted by Michal Karm Babacek <karm@redhat.com> from hints by [Stanislav](http://stackoverflow.com/a/15281070/32453) and [rogerdpack](https://stackoverflow.com/users/32453/rogerdpack).
