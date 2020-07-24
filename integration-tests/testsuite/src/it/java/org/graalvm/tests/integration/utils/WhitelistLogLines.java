@@ -49,7 +49,7 @@ public enum WhitelistLogLines {
     }),
 
     HELIDON_QUICKSTART_SE(new Pattern[]{
-            // Unused argument on new Graal; Quarkus uses it for backward compatibility.
+            // Unused argument on new Graal
             Pattern.compile(".*Ignoring server-mode native-image argument --no-server.*")
     });
 

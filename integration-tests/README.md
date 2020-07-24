@@ -4,7 +4,7 @@ as Quarkus, Micronaut and Helidon. It also provides a convenient way of building
 
 ## Prerequisites
 
-The TS expects you run Java 11+ and have ```ps``` program available on your Linux/Mac
+The test suite (TS) expects you run Java 11+ and have ```ps``` program available on your Linux/Mac
 and ```wmic``` (by default present) on your Windows system.
 Native image builds also require you have the following packages installed:
 * glibc-devel
@@ -118,4 +118,4 @@ For logs checking, see an example failure before we whitelisted the particular w
     [WARNING] Discovered module-info.class. Shading will break its strong encapsulation.
 ```
 
-Happy testing!
+**Happy testing!**
