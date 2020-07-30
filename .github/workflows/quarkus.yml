@@ -28,7 +28,7 @@ env:
   DB_USER: hibernate_orm_test
   DB_PASSWORD: hibernate_orm_test
   DB_NAME: hibernate_orm_test
-  NATIVE_TEST_MAVEN_OPTS: "-B --settings .github/mvn-settings.xml --fail-at-end -Dtest-postgresql -Dtest-elasticsearch -Dtest-keycloak -Dtest-amazon-services -Dtest-db2 -Dtest-mysql -Dtest-mariadb -Dmariadb.base_url='jdbc:mariadb://localhost:3308' -Dmariadb.url='jdbc:mariadb://localhost:3308/hibernate_orm_test'  -Dtest-mssql -Dtest-vault -Dtest-neo4j -Dtest-kafka -Dnative-image.xmx=5g -Dnative -Dformat.skip install"
+  NATIVE_TEST_MAVEN_OPTS: "-B --settings .github/mvn-settings.xml --fail-at-end -Dquarkus.native.additional-build-args=-J-ea -Dtest-postgresql -Dtest-elasticsearch -Dtest-keycloak -Dtest-amazon-services -Dtest-db2 -Dtest-mysql -Dtest-mariadb -Dmariadb.base_url='jdbc:mariadb://localhost:3308' -Dmariadb.url='jdbc:mariadb://localhost:3308/hibernate_orm_test'  -Dtest-mssql -Dtest-vault -Dtest-neo4j -Dtest-kafka -Dnative-image.xmx=5g -Dnative -Dformat.skip install"
   MX_GIT_CACHE: refcache
   JAVA_HOME: ${{ github.workspace }}/openjdk
   MANDREL_REPO: ${{ github.workspace }}
@@ -157,7 +157,7 @@ jobs:
           - category: Data1
             mariadb: "true"
             mssql: "true"
-            timeout: 65
+            timeout: 75
             test-modules: >
               jpa-h2
               jpa-mariadb
@@ -170,7 +170,7 @@ jobs:
             mysql: "true"
             postgres: "true"
             mariadb: "true"
-            timeout: 65
+            timeout: 100
             test-modules: >
               jpa
               jpa-postgresql
@@ -189,7 +189,7 @@ jobs:
               liquibase
           - category: Data4
             neo4j: "true"
-            timeout: 50
+            timeout: 60
             test-modules: >
               mongodb-client
               mongodb-panache
@@ -250,7 +250,7 @@ jobs:
               infinispan-client
               cache
           - category: HTTP
-            timeout: 55
+            timeout: 65
             test-modules: >
               resteasy-jackson
               resteasy-mutiny
@@ -260,7 +260,7 @@ jobs:
               virtual-http
               rest-client
           - category: Misc1
-            timeout: 60
+            timeout: 70
             test-modules: >
               maven
               jackson
@@ -290,7 +290,7 @@ jobs:
               picocli-native
               gradle
           - category: Spring
-            timeout: 50
+            timeout: 60
             test-modules: >
               spring-di
               spring-web
@@ -298,7 +298,7 @@ jobs:
               spring-boot-properties
               spring-cloud-config-client
           - category: gRPC
-            timeout: 65
+            timeout: 85
             test-modules: >
               grpc-health
               grpc-interceptors
