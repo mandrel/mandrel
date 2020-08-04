@@ -21,6 +21,8 @@ on:
       - 'LICENSE'
       - '.github/ISSUE_TEMPLATE/**'
       - '.travis.yml'
+  schedule:
+  - cron: '0 5 * * *'
 
 env:
   # Workaround testsuite locale issue
@@ -43,6 +45,7 @@ jobs:
     - uses: actions/checkout@v1
       with:
         fetch-depth: 1
+        ref: graal/master
         path: mandrel
     - uses: actions/checkout@v1
       with:
