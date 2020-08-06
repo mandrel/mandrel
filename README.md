@@ -8,7 +8,7 @@ The aim is to align the `native-image` capabilities from GraalVM with OpenJDK an
 
 Mandrel releases are built from a code base derived from the upstream GraalVM code base, with only minor changes but some significant exclusions. 
 They support the same native image capability as GraalVM with no significant changes to functionality.
-They do not include support for Polyglot programming via the Truffle interpreter and compiler framework. 
+They do not include support for the image build server and Polyglot programming via the Truffle interpreter and compiler framework. 
 In consequence, it is not possible to extend Mandrel by downloading languages from the Truffle language catalogue.
 
 Mandrel is also built slightly differently to GraalVM, using the standard OpenJDK project release of jdk11u.
@@ -29,6 +29,7 @@ Please report security vulnerabilities according to the [Reporting Vulnerabiliti
 ## Getting Started
 
 Mandrel distributions can be downloaded from [the repository's releases](https://github.com/graalvm/mandrel/releases)
+and container images are available at [quay.io](https://quay.io/repository/quarkus/ubi-quarkus-mandrel?tag=latest&tab=tags).
 
 ### Prerequisites
 
@@ -48,11 +49,8 @@ On Ubuntu-like systems with:
 apt install gcc zlib1g-dev libffi-dev
 ```
 
-### Building Mandrel From Source
+## Building Mandrel From Source
 
 For building Mandrel from source please see [mandrel-packaging](https://github.com/graalvm/mandrel-packaging)
-
-## Repository Structure
-
-Mandrel shares the same repository structure with Graal, please see (README.md#repository-structure).
+and consult [Repository Structure in CONTRIBUTING.md](CONTRIBUTING.md#repository-structure) regarding which branch of Mandrel to use.
 

@@ -2,25 +2,11 @@ name: Quarkus tests
 
 on:
   push:
-    paths-ignore:
-      - 'README.md'
-      - 'README-Mandrel.md'
-      - 'CONTRIBUTING.md'
-      - 'SECURITY.md'
-      - 'LICENSE'
-      - '.github/ISSUE_TEMPLATE/**'
-      - '.travis.yml'
+    paths:
+      - '.github/workflows/quarkus.yml'
   pull_request:
-    types: [opened, synchronize, reopened, ready_for_review]
-    paths-ignore:
-      - 'docs/src/main/asciidoc/**'
-      - 'README.md'
-      - 'README-Mandrel.md'
-      - 'CONTRIBUTING.md'
-      - 'SECURITY.md'
-      - 'LICENSE'
-      - '.github/ISSUE_TEMPLATE/**'
-      - '.travis.yml'
+    paths:
+      - '.github/workflows/quarkus.yml'
   schedule:
   - cron: '0 5 * * *'
 
@@ -60,6 +46,7 @@ jobs:
     - uses: n1hility/cancel-previous-runs@v2
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
+        if: ${{ github.ref }} != graal/master
     - uses: actions/cache@v1
       with:
         path: ~/.mx
