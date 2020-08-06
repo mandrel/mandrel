@@ -1,67 +1,58 @@
 # Mandrel
 
-## Welcome to the Mandrel project, please see [README-Mandrel.md](README-Mandrel.md) to learn more.
+Mandrel is a downstream distribution of the GraalVM community edition.
+Mandrel's main goal is to provide a `native-image` release specifically to support [Quarkus](https://quarkus.io).
+The aim is to align the `native-image` capabilities from GraalVM with OpenJDK and Red Hat Enterprise Linux libraries to improve maintainability for native Quarkus applications.
 
-# GraalVM
+## How Does Mandrel Differ From Graal
 
-[![https://graalvm.slack.com](https://img.shields.io/badge/slack-join%20channel-active)](https://www.graalvm.org/slack-invitation/)
+Mandrel releases are built from a code base derived from the upstream GraalVM code base, with only minor changes but some significant exclusions. 
+They support the same native image capability as GraalVM with no significant changes to functionality.
+They do not include support for Polyglot programming via the Truffle interpreter and compiler framework. 
+In consequence, it is not possible to extend Mandrel by downloading languages from the Truffle language catalogue.
 
-GraalVM is a universal virtual machine for running applications written in JavaScript, Python, Ruby, R, JVM-based languages like Java, Scala, Clojure, Kotlin, and LLVM-based languages such as C and C++.
+Mandrel is also built slightly differently to GraalVM, using the standard OpenJDK project release of jdk11u.
+This means it does not profit from a few small enhancements that Oracle have added to the version of OpenJDK used to build their own GraalVM downloads.
+Most of these enhancements are to the JVMCI module that allows the Graal compiler to be run inside OpenJDK.
+The others are small cosmetic changes to behaviour.
+These enhancements may in some cases cause minor differences in the progress of native image generation.
+They should not cause the resulting images themselves to execute in a noticeably different manner.
 
-The project website at [https://www.graalvm.org](https://www.graalvm.org) describes how to [get started](https://www.graalvm.org/docs/getting-started/), how to [stay connected](https://www.graalvm.org/community/), and how to [contribute](https://www.graalvm.org/community/contributors/).
+## Communication Channels
+
+* [Slack](https://www.graalvm.org/slack-invitation) - Join #mandrel channel at graalvm's slack workspace
+* [graalvm-dev@oss.oracle.com](mailto:graalvm-dev@oss.oracle.com?subject=[MANDREL]) mailing list - Subscribe [here](https://oss.oracle.com/mailman/listinfo/graalvm-dev)
+* [GitHub issues](https://github.com/graalvm/mandrel/issues) for bug reports, questions, or requests for enhancements.
+
+Please report security vulnerabilities according to the [Reporting Vulnerabilities guide](https://www.oracle.com/corporate/security-practices/assurance/vulnerability/reporting.html).
+
+## Getting Started
+
+Mandrel distributions can be downloaded from [the repository's releases](https://github.com/graalvm/mandrel/releases)
+
+### Prerequisites
+
+Mandrel's `native-image` depends on the following packages:
+* glibc-devel
+* zlib-devel
+* gcc
+* libffi-devel
+
+On Fedora/CentOS/RHEL they can be installed with:
+```bash
+dnf install glibc-devel zlib-devel gcc libffi-devel
+```
+
+On Ubuntu-like systems with:
+```bash
+apt install gcc zlib1g-dev libffi-dev
+```
+
+### Building Mandrel From Source
+
+For building Mandrel from source please see [mandrel-packaging](https://github.com/graalvm/mandrel-packaging)
 
 ## Repository Structure
 
-The GraalVM main source repository includes the following components:
+Mandrel shares the same repository structure with Graal, please see (README.md#repository-structure).
 
-* [GraalVM SDK](sdk/README.md) contains long term supported APIs of GraalVM.
-
-* [GraalVM compiler](compiler/README.md) written in Java that supports both dynamic and static compilation and can integrate with
-the Java HotSpot VM or run standalone.
-
-* [Truffle](truffle/README.md) language implementation framework for creating languages and instrumentations for GraalVM.
-
-* [Tools](tools/README.md) contains a set of tools for GraalVM languages
-implemented with the instrumentation framework.
-
-* [Substrate VM](substratevm/README.md) framework that allows ahead-of-time (AOT)
-compilation of Java applications under closed-world assumption into executable
-images or shared objects.
-
-* [Sulong](sulong/README.md) is an engine for running LLVM bitcode on GraalVM.
-
-* [GraalWasm](wasm/README.md) is an engine for running WebAssembly programs on GraalVM.
-
-* [TRegex](regex/README.md) is an implementation of regular expressions which leverages GraalVM for efficient compilation of automata.
-
-* [VM](vm/README.md) includes the components to build a modular GraalVM image.
-
-* [VS Code](/vscode/README.md) provides extensions to Visual Studio Code that support development of polyglot applications using GraalVM.
-
-## Get Support
-
-* Open a [GitHub issue](https://github.com/oracle/graal/issues) for bug reports, questions, or requests for enhancements.
-* Report a security vulnerability according to the [Reporting Vulnerabilities guide](https://www.oracle.com/corporate/security-practices/assurance/vulnerability/reporting.html).
-
-## Related Repositories
-
-GraalVM allows running of following languages which are being developed and tested in related repositories with GraalVM core to run on top of it using Truffle and the GraalVM compiler. These are:
-* [GraalJS](https://github.com/graalvm/graaljs) - JavaScript (ECMAScript 2019 compatible) and Node.js 10.16.3
-* [FastR](https://github.com/oracle/fastr) - R Language 3.6.1
-* [GraalPython](https://github.com/graalvm/graalpython) - Python 3.7
-* [TruffleRuby](https://github.com/oracle/truffleruby/) - Ruby Programming Language 2.6.2
-* [SimpleLanguage](https://github.com/graalvm/simplelanguage) - A simple demonstration language for the GraalVM.
-
-
-## License
-
-Each GraalVM component is licensed:
-* [Truffle Framework](/truffle/) and its dependency [GraalVM SDK](/sdk/) are licensed under the [Universal Permissive License](truffle/LICENSE.md).
-* [Tools](/tools/) project is licensed under the [GPL 2 with Classpath exception](tools/LICENSE).
-* [TRegex](/regex/) project is licensed under the [Universal Permissive License](regex/LICENSE.md).
-* [GraalVM compiler](/compiler/) is licensed under the [GPL 2 with Classpath exception](compiler/LICENSE.md).
-* [Substrate VM](/substratevm/) is licensed under the [GPL 2 with Classpath exception](substratevm/LICENSE).
-* [Sulong](/sulong/) is licensed under [3-clause BSD](sulong/LICENSE).
-* [GraalWasm](/wasm/) is licensed under the [Universal Permissive License](wasm/LICENSE).
-* [VM](/vm/) is licensed under the [GPL 2 with Classpath exception](vm/LICENSE_GRAALVM_CE).
-* [VS Code](/vscode/) extensions are distributed under the [UPL 1.0 license](/vscode/graalvm/LICENSE.txt).
