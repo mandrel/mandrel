@@ -85,31 +85,24 @@ jobs:
         path: mandreljdk.tgz
 
   build-quarkus:
-    name: ${{ matrix.category }} build
+    name: Quarkus ${{ matrix.quarkus }} build
     runs-on: ubuntu-18.04
     needs: build-mandrel
     strategy:
       matrix:
-        category: [quarkus-release, quarkus-master]
-        include:
-          - category: quarkus-release
-            quarkus-url: $(curl -sL https://api.github.com/repos/quarkusio/quarkus/releases/latest | jq -r .tarball_url)
-            quarkus-name: release
-          - category: quarkus-master
-            quarkus-url: https://api.github.com/repos/quarkusio/quarkus/tarball/master
-            quarkus-name: master
+        quarkus: [master, 1.7]
     steps:
     - name: Get quarkus
       run: |
-        curl --output quarkus.tgz -sL ${{ matrix.quarkus-url }}
+        curl --output quarkus.tgz -sL https://api.github.com/repos/quarkusio/quarkus/tarball/${{ matrix.quarkus }}
         mkdir ${GITHUB_WORKSPACE}/quarkus
         tar xf quarkus.tgz -C ${GITHUB_WORKSPACE}/quarkus --strip-components=1
     - uses: actions/cache@v1
       with:
         path: ~/.m2/repository
-        key: ${{ runner.os }}-${{ matrix.quarkus-name }}-maven-${{ hashFiles('**/pom.xml') }}
+        key: ${{ runner.os }}-${{ matrix.quarkus }}-maven-${{ hashFiles('**/pom.xml') }}
         restore-keys: |
-          ${{ runner.os }}-${{ matrix.quarkus-name }}-maven-
+          ${{ runner.os }}-${{ matrix.quarkus }}-maven-
     - name: Download Mandrel build
       uses: actions/download-artifact@v1
       with:
@@ -125,15 +118,15 @@ jobs:
         mvn -e -B --settings .github/mvn-settings.xml -DskipTests -DskipITs -Dno-format -Ddocumentation-pdf clean install
     - name: Tar Maven Repo
       shell: bash
-      run: tar -czvf maven-repo-${{ matrix.quarkus-name }}.tgz -C ~ .m2/repository
+      run: tar -czvf maven-repo-${{ matrix.quarkus }}.tgz -C ~ .m2/repository
     - name: Persist Maven Repo
       uses: actions/upload-artifact@v2
       with:
-        name: maven-repo-${{ matrix.quarkus-name }}
-        path: maven-repo-${{ matrix.quarkus-name }}.tgz
+        name: maven-repo-${{ matrix.quarkus }}
+        path: maven-repo-${{ matrix.quarkus }}.tgz
 
   native-tests:
-    name: ${{matrix.quarkus-name}} - ${{matrix.category}}
+    name: Quarkus ${{matrix.quarkus}} - ${{matrix.category}}
     needs:
       - build-mandrel
       - build-quarkus
@@ -143,13 +136,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        quarkus-name: [release, master]
+        quarkus: [master, 1.7]
         category: [Main, Data1, Data2, Data3, Data4, Data5, Data6, Security1, Security2, Security3, Amazon, Messaging, Cache, HTTP, Misc1, Misc2, Misc3, Misc4, Spring, gRPC]
         include:
-          - quarkus-name: release
-            quarkus-url: $(curl -sL https://api.github.com/repos/quarkusio/quarkus/releases/latest | jq -r .tarball_url)
-          - quarkus-name: master
-            quarkus-url: https://api.github.com/repos/quarkusio/quarkus/tarball/master
           - category: Main
             postgres: "true"
             timeout: 40
@@ -376,11 +365,11 @@ jobs:
       - name: Download Maven Repo
         uses: actions/download-artifact@v1
         with:
-          name: maven-repo-${{ matrix.quarkus-name }}
+          name: maven-repo-${{ matrix.quarkus }}
           path: .
       - name: Extract Maven Repo
         shell: bash
-        run: tar -xzvf maven-repo-${{ matrix.quarkus-name }}.tgz -C ~
+        run: tar -xzvf maven-repo-${{ matrix.quarkus }}.tgz -C ~
       - name: Download Mandrel build
         uses: actions/download-artifact@v1
         with:
@@ -391,7 +380,7 @@ jobs:
         run: tar -xzvf mandreljdk.tgz -C ~
       - name: Get quarkus
         run: |
-          curl --output quarkus.tgz -sL ${{ matrix.quarkus-url }}
+          curl --output quarkus.tgz -sL https://api.github.com/repos/quarkusio/quarkus/tarball/${{ matrix.quarkus }}
           mkdir ${GITHUB_WORKSPACE}/quarkus
           tar xf quarkus.tgz -C ${GITHUB_WORKSPACE}/quarkus --strip-components=1
       - name: Reclaim disk space
