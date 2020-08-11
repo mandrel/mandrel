@@ -155,6 +155,7 @@ public class RuntimesSmokeTest {
 
     @Test
     @Tag("helidon")
+    // No Windows. https://github.com/oracle/helidon/issues/2230
     public void helidonQuickStart(TestInfo testInfo) throws IOException, InterruptedException {
         testRuntime(testInfo, Apps.HELIDON_QUICKSTART_SE);
     }
