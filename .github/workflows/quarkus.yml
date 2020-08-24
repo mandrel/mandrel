@@ -40,6 +40,7 @@ jobs:
     name: Mandrel build - ${{ matrix.jdk }}
     runs-on: ubuntu-18.04
     strategy:
+      fail-fast: false
       matrix:
         jdk: ['OpenJDK11-latest-GA', 'OpenJDK11-latest-EA']
         include:
@@ -97,6 +98,7 @@ jobs:
     runs-on: ubuntu-18.04
     needs: build-mandrel
     strategy:
+      fail-fast: false
       matrix:
         jdk: ['OpenJDK11-latest-GA', 'OpenJDK11-latest-EA']
         quarkus: [master, 1.7]
