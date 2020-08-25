@@ -181,7 +181,7 @@ jobs:
               hibernate-reactive-mysql
           - category: Data3
             postgres: "true"
-            timeout: 70
+            timeout: 90
             test-modules: >
               flyway
               hibernate-orm-panache
@@ -230,7 +230,7 @@ jobs:
               kafka-streams
               reactive-messaging-amqp
           - category: Security1
-            timeout: 50
+            timeout: 70
             keycloak: "true"
             test-modules: >
               elytron-security-oauth2
@@ -301,7 +301,7 @@ jobs:
               picocli-native
               gradle
           - category: Spring
-            timeout: 60
+            timeout: 80
             test-modules: >
               spring-di
               spring-web
