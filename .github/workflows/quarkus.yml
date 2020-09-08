@@ -101,7 +101,7 @@ jobs:
       fail-fast: false
       matrix:
         jdk: ['OpenJDK11-latest-GA', 'OpenJDK11-latest-EA']
-        quarkus: [master, 1.7]
+        quarkus: [1.7]
     steps:
     - name: Get quarkus
       run: |
@@ -148,7 +148,7 @@ jobs:
       fail-fast: false
       matrix:
         jdk: ['OpenJDK11-latest-GA', 'OpenJDK11-latest-EA']
-        quarkus: [master, 1.7]
+        quarkus: [1.7]
         category: [Main, Data1, Data2, Data3, Data4, Data5, Data6, Security1, Security2, Security3, Amazon, Messaging, Cache, HTTP, Misc1, Misc2, Misc3, Misc4, Spring, gRPC]
         include:
           - category: Main
