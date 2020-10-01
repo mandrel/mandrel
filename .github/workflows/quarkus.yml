@@ -82,31 +82,29 @@ jobs:
         path: mandreljdk.tgz
 
   build-quarkus:
-    name: ${{ matrix.category }} build
+    name: ${{ matrix.quarkus-name }} build
     runs-on: ubuntu-18.04
     needs: build-mandrel
     strategy:
       matrix:
-        category: [quarkus-release, quarkus-master]
+        quarkus-name: [release, master]
         include:
-          - category: quarkus-release
-            quarkus-url: $(curl -sL https://api.github.com/repos/quarkusio/quarkus/releases/latest | jq -r .tarball_url)
-            quarkus-name: release
-          - category: quarkus-master
-            quarkus-url: https://api.github.com/repos/quarkusio/quarkus/tarball/master
-            quarkus-name: master
+          - quarkus-name: release
+            quarkus-version: $(curl https://repo1.maven.org/maven2/io/quarkus/quarkus-bom/maven-metadata.xml | awk -F"[<>]" '/latest/ {print $3}')
+          - quarkus-name: master
+            quarkus-version: master
     steps:
     - name: Get quarkus
       run: |
-        curl --output quarkus.tgz -sL ${{ matrix.quarkus-url }}
+        curl --output quarkus.tgz -sL https://api.github.com/repos/quarkusio/quarkus/tarball/${{ matrix.quarkus-version }}
         mkdir ${GITHUB_WORKSPACE}/quarkus
         tar xf quarkus.tgz -C ${GITHUB_WORKSPACE}/quarkus --strip-components=1
     - uses: actions/cache@v1
       with:
         path: ~/.m2/repository
-        key: ${{ runner.os }}-${{ matrix.quarkus-name }}-maven-${{ hashFiles('**/pom.xml') }}
+        key: ${{ runner.os }}-${{ matrix.quarkus-version }}-maven-${{ hashFiles('**/pom.xml') }}
         restore-keys: |
-          ${{ runner.os }}-${{ matrix.quarkus-name }}-maven-
+          ${{ runner.s }}-${{ matrix.quarkus-version }}-maven-
     - name: Download Mandrel build
       uses: actions/download-artifact@v1
       with:
@@ -147,9 +145,9 @@ jobs:
         category: [Main, Data1, Data2, Data3, Data4, Data5, Data6, Security1, Security2, Security3, Amazon, Messaging, Cache, HTTP, Misc1, Misc2, Misc3, Misc4, Spring, gRPC]
         include:
           - quarkus-name: release
-            quarkus-url: $(curl -sL https://api.github.com/repos/quarkusio/quarkus/releases/latest | jq -r .tarball_url)
+            quarkus-version: $(curl https://repo1.maven.org/maven2/io/quarkus/quarkus-bom/maven-metadata.xml | awk -F"[<>]" '/latest/ {print $3}')
           - quarkus-name: master
-            quarkus-url: https://api.github.com/repos/quarkusio/quarkus/tarball/master
+            quarkus-version: master
           - category: Main
             postgres: "true"
             timeout: 40
@@ -403,7 +401,7 @@ jobs:
         run: tar -xzvf mandreljdk.tgz -C ~
       - name: Get quarkus
         run: |
-          curl --output quarkus.tgz -sL ${{ matrix.quarkus-url }}
+          curl --output quarkus.tgz -sL https://api.github.com/repos/quarkusio/quarkus/tarball/${{ matrix.quarkus-version }}
           mkdir ${GITHUB_WORKSPACE}/quarkus
           tar xf quarkus.tgz -C ${GITHUB_WORKSPACE}/quarkus --strip-components=1
       - name: Reclaim disk space
