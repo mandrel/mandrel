@@ -45,7 +45,7 @@ jobs:
             -H "Accept: application/vnd.github.v3+json" \
             -H "Content-Type: application/json" \
             -H "Authorization: Bearer ${WORKFLOW_TOKEN}" \
-            -d "{\"ref\":\"${GITHUB_REF}\",\"inputs\":${INPUTS}}" \
+            -d "{\"ref\":\"default\",\"inputs\":${INPUTS}}" \
             -w "%{http_code}")
           sleep 30 # back off
         done
